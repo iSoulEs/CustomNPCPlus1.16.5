@@ -101,26 +101,47 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
         drawTextBlock(matrixStack, dialog.text, (width - textBlockWidth) / 2, height - textPartHeight + 23 + 3 + gap, textBlockWidth);
         selected = -1;
         matrixStack.scale((float) wcoeff, (float) wcoeff, (float) wcoeff);
+        int accumulatedHeight = 0;  // Altura acumulada de las opciones anteriores
         for (int i = 0; i < this.options.size(); i++) {
-            int optionHeight = (int) (220 * hcoeff + i * (13 + 6));
             int optionNum = options.get(i);
             DialogOption option = dialog.options.get(optionNum);
+            int optionHeight = (int) (220 * hcoeff + accumulatedHeight);
+
+            // Calcular el ancho máximo necesario para todas las líneas del título
+            String[] titleLines = option.title.split("\\\\n");
+            int optionWidth = 0;
+            for (String line : titleLines) {
+                int lineWidth = this.font.width(line);
+                optionWidth = Math.max(optionWidth, lineWidth);
+            }
+            optionWidth += 32; // Ajustar según necesidades visuales
+
             if (mouseX >= 723 * wcoeff && mouseX <= 946 * wcoeff && mouseY >= optionHeight * wcoeff && mouseY <= (optionHeight + 13) * wcoeff) {
                 selected = i;
             }
             RenderSystem.enableBlend();
             this.minecraft.getTextureManager().bind(decomposed);
-            this.blit(matrixStack, 723, optionHeight, 0, i == selected ? 13 : 0, 223, 13);
+            this.blit(matrixStack, 723, optionHeight, 0, i == selected ? 13 : 0, optionWidth, 13);
             RenderSystem.disableBlend();
             if (getQuestByOptionId(optionNum) != null) {
                 drawString(matrixStack, this.font, "!", 727, optionHeight + 3, 0x76e85b);
             } else {
                 drawString(matrixStack, this.font, ">", 727, optionHeight + 3, -1);
             }
-            drawString(matrixStack, this.font, option.title, 735, optionHeight + 3, option.optionColor);
+
+            // Renderizar cada línea del título
+            int lineOffset = 0;
+            for (String line : titleLines) {
+                if (!line.isEmpty()) {
+                    drawString(matrixStack, this.font, line, 735, optionHeight + 3 + lineOffset, option.optionColor);
+                    lineOffset += 12; // Ajustar según el tamaño de fuente y el espaciado deseado
+                }
+            }
+            accumulatedHeight += 13 + 6 + lineOffset;
         }
         matrixStack.popPose();
     }
+
 
     public Quest getQuestByOptionId(int id) {
         DialogOption option = dialog.options.get(id);
@@ -269,7 +290,7 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
         for (Iterator<ITextComponent> var9 = block.lines.iterator(); var9.hasNext(); count++) {
             ITextComponent line = var9.next();
             int height = y + count * ClientProxy.Font.height(null);
-            AbstractGui.drawCenteredString(stack, font, line, x + width / 2, height, -1);
+            AbstractGui.drawString(stack, font, line, x, height, -1);
         }
     }
 
