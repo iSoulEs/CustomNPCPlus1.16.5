@@ -47,11 +47,14 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
     private final ResourceLocation decomposed = new ResourceLocation("customnpcs", "textures/gui/dialog_menu_decomposed.png");
     private boolean isGrabbed = false;
 
+    private boolean useCenteredText = false;
+
     public GuiDialogModern(EntityNPCInterface npc, Dialog dialog) {
         super(npc);
         this.dialog = dialog;
         this.appendDialog(dialog);
         this.imageHeight = 238;
+        this.useCenteredText = npc.ais.textoCentrado;
     }
 
     public void init() {
@@ -59,6 +62,7 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
         this.isGrabbed = false;
         this.grabMouse(this.dialog.showWheel);
         this.guiTop = this.height - this.imageHeight;
+        this.useCenteredText = this.npc.ais.textoCentrado;
     }
 
     public void grabMouse(boolean grab) {
@@ -282,17 +286,29 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
         this.grabMouse(false);
         Packets.sendServer(new SPacketQuestCompletionCheckAll());
     }
+    // Método para manejar el evento de un botón u otro evento que cambie la configuración
+
+    public void toggleTextAlignment() {
+        useCenteredText = !useCenteredText;
+        npc.ais.textoCentrado = useCenteredText;
+    }
 
     public void drawTextBlock(MatrixStack stack, String text, int x, int y, int width) {
         TextBlockClient block = new TextBlockClient("", text, width, -1, player, npc);
 
         int count = 0;
-        for (Iterator<ITextComponent> var9 = block.lines.iterator(); var9.hasNext(); count++) {
-            ITextComponent line = var9.next();
+        for (Iterator<ITextComponent> iterator = block.lines.iterator(); iterator.hasNext(); count++) {
+            ITextComponent line = iterator.next();
             int height = y + count * ClientProxy.Font.height(null);
-            AbstractGui.drawString(stack, font, line, x, height, -1);
+
+            if (useCenteredText) {
+                AbstractGui.drawCenteredString(stack, font, line, x + width / 2, height, -1);
+            } else {
+                AbstractGui.drawString(stack, font, line, x, height, -1);
+            }
         }
     }
+
 
     public int getLineCount(String text, int width) {
         TextBlockClient block = new TextBlockClient("", text, width, -1, player, npc);
