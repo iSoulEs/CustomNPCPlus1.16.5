@@ -91,7 +91,8 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
                 drawNpc(npc, -210 + (int) (300 * (1 - wcoeff)), 350 - (int) (100 * (1 - hcoeff)), (float) (9.5F * hcoeff), -20);
             }
         }
-        int textBlockWidth = 700;
+        int screenWidth = this.width; // Obtén el ancho de la pantalla
+        int textBlockWidth = (int) (screenWidth * 0.7); // Ajusta el ancho del cuadro de texto al 70% del ancho de la pantalla
         int lineCount = getLineCount(dialog.text, textBlockWidth);
         int gap = Math.max(16, Math.min((int) (2.6f * (float) lineCount), 32));
         int textPartHeight = 23 + 3 + lineCount * ClientProxy.Font.height(null) + 2 * gap;
@@ -102,7 +103,9 @@ public class GuiDialogModern extends GuiNPCInterface implements IGuiClose {
         matrixStack.scale(1.5f, 1.5f, 1);
         AbstractGui.drawString(matrixStack, font, npc.getDisplayName(), (int) (47 / 1.5), (int) ((height - textPartHeight + 5) / 1.5), -1);
         matrixStack.scale(1 / 1.5f, 1 / 1.5f, 1);
-        drawTextBlock(matrixStack, dialog.text, (width - textBlockWidth) / 2, height - textPartHeight + 23 + 3 + gap, textBlockWidth);
+        int textX = (width - textBlockWidth) / 2; // Centra el texto horizontalmente
+        int textY = height - textPartHeight + 23 + 3 + gap;  //auto escalado de temaño de interfaz
+        drawTextBlock(matrixStack, dialog.text, textX, textY, textBlockWidth);  //auto escalado de temaño de interfaz
         selected = -1;
         matrixStack.scale((float) wcoeff, (float) wcoeff, (float) wcoeff);
         int accumulatedHeight = 0;  // Altura acumulada de las opciones anteriores
